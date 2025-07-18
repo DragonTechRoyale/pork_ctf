@@ -17,8 +17,7 @@
 #include <sys/endian.h>
 #include <sys/stat.h>
 #include "notes.h"
-
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, "PORK", __VA_ARGS__)
+#include <sys/syscall.h>
 
 typedef void *(*thread_func_t)(void *);
 constexpr int PORT = 8888;
@@ -37,7 +36,24 @@ enum Actions {
 #define STACK_OFFSET (0x69 + PAGE_SIZE * 2)
 
 #define STRONG_USERNAME "ADMIN" // You know the username
-#define STRONG_PASSWORD "WOWWWThisIsTheStrongestPasswordEver123!@#" // You don't know the password
+#define STRONG_PASSWORD "WOWWWThisIsTheStrongestPasswordEver123!@#" // You don't know the password // ## password len is 41
 #define HIGH_NUMBER_OF_NOTES 0x69
+#define LOG_HEADER "PORK APP "  
+
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, "PORK", __VA_ARGS__)
 
 const std::string CTF_FLAG = "FLAG{this_is_a_fake_flag}";
+
+#if defined(__aarch64__)
+# define __get_tls() ({ void** __val; __asm__("mrs %0, tpidr_el0" : "=r"(__val)); __val; })
+#elif defined(__arm__)
+# define __get_tls() ({ void** __val; __asm__("mrc p15, 0, %0, c13, c0, 3" : "=r"(__val)); __val; })
+#elif defined(__i386__)
+# define __get_tls() ({ void** __val; __asm__("movl %%gs:0, %0" : "=r"(__val)); __val; })
+#elif defined(__riscv)
+# define __get_tls() ({ void** __val; __asm__("mv %0, tp" : "=r"(__val)); __val; })
+#elif defined(__x86_64__)
+# define __get_tls() ({ void** __val; __asm__("mov %%fs:0, %0" : "=r"(__val)); __val; })
+#else
+#error unsupported architecture
+#endif

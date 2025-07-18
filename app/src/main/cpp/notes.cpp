@@ -3,7 +3,7 @@
 void check_path(const char *user) {
     // Check if the user is valid (only alphanumeric characters):
     uint32_t i = 0;
-    for (i = 0; user[i] != '\0'; i++) {
+    for (i = 0; user[i] != '\0'; i++) { // ## stops at byte 0, what if username contains nullbyte? - it wont check other bytes :)
         if (!isalnum(user[i])) {
             pthread_exit(nullptr);
         }
@@ -45,7 +45,7 @@ uint8_t get_notes_count(const char *user) {
         return -1;
     }
     // returns the number of notes the user has:
-    int count = -1;
+    int count = -1; // ## why start from -1? - prob to get it at index like in notes.cpp:60
     for (const auto &_: fs::directory_iterator(USERS_PATH / user)) {
         count++;
     }
@@ -58,7 +58,7 @@ void create_note(const char *user, const std::string &note) {
         return;
     }
     const uint8_t new_note_index = get_notes_count(user);
-    if (new_note_index > 200) {
+    if (new_note_index > 200) { // ## why 200?
         return;
     }
     fs::path note_path = USERS_PATH / user / std::to_string(new_note_index);
